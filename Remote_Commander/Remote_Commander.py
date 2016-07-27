@@ -4,14 +4,35 @@ from fabric.api import *
 
 def deploy(ip, password, user='root'):
     with settings(
-        hide('warnings', 'running', 'stdout', 'stderr'),
-        host_string=ip,
-        user = user,
-        password = password
-    ):
-        #put('kk.txt', '/root/')
-        result=run("hostname")
+            hide('warnings', 'running', 'stdout'),
+            #parallel = True,
+            host_string=ip,
+            user = user,
+            password = password,
+            cwd = '/home/'
+            #warn_only = True
+        ):
+            result = put('filelist.txt', '/home/').succeeded
 
+    return result
+
+
+def remote_commander(ip, password, user='root'):
+    with settings(
+            hide('warnings', 'running', 'stdout'),
+            #parallel = True,
+            host_string=ip,
+            user = user,
+            password = password,
+            cwd = '/home/'
+            #warn_only = True
+        ):
+            # with prefix("hostname"), prefix('echo "test : "'):
+
+            with cd('/home'):
+                 with quiet():
+                     result = run('ls `cat filelist.txt`').succeeded
+                    # result = run('bash test.sh')
     return result
 
 
@@ -27,7 +48,13 @@ def main():
     }
 
     for ip in ip_list.keys():
-        print deploy(ip, ip_list[ip])
+        if deploy(ip, ip_list[ip]):
+            print ("%s :: %s" % (ip, remote_commander(ip, ip_list[ip])))
+        else:
+            print ("%s, File Transfer Fail" % ip)
+
 
 if __name__ == '__main__':
     main()
+
+
