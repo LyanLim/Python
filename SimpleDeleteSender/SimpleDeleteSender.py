@@ -1,4 +1,4 @@
-#!/usr/bin/pathon
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 import re
@@ -16,10 +16,13 @@ def remote_delete(ip, user, password, filename):
         password = password,
     ):
         with quiet():
-            command = "rm -f " + root_dir + "/" + filename
-            # print command
-            result = run(command).succeeded
-    return result
+            command = "ls " + root_dir + "/" + filename
+            if run(command).succeeded:
+
+                command = "rm -f " + root_dir + "/" + filename
+                return [run(command).succeeded, filename]
+            else:
+                return [False, filename, "No serch file!"]
 
 def get_cfg():
     f = open("SimpleDeleteSender.cfg", "r")
@@ -62,10 +65,12 @@ def main():
             for filename in lines:
                 filename = filename.strip('\n')
                 for ip in ip_list.keys():
-                    if remote_delete(ip, ip_list[ip][0], ip_list[ip][1], filename):
-                        f_resultfile.write("SUCCESS," + filename + "\n")
+                    result = remote_delete(ip, ip_list[ip][0], ip_list[ip][1], filename)
+                    if result[0]:
+                        f_resultfile.write(result[1] + ",SUCCESS\n")
                     else:
-                        f_resultfile.write("FAIL," + filename + "\n")
+                        f_resultfile.write(result[1] + "FAIL," + result[2] "\n")
+
             f_deletefile.close()
             f_resultfile.close()
 
@@ -78,14 +83,16 @@ if __name__ == '__main__':
 
     get_cfg()
 
-    import_dir = config['Import_Dir']
-    work_dir = config['Temp_Dir']
-    result_dir = config['Result_Dir']
+    transaction = config['Transaction_Path']
+    import_dir = transaction + "/" + config['Import_Dir']
+    work_dir = transaction + "/" + config['Temp_Dir']
+    result_dir = transaction + "/" + config['Result_Dir']
     delete_file = config['Delete_File_Name']
     root_dir = config['RootDir']
     mode = config['Mode']
 
     #create default directory
+    if not glob.glob(transaction): os.mkdir(transaction)
     if not glob.glob(import_dir): os.mkdir(import_dir)
     if not glob.glob(work_dir): os.mkdir(work_dir)
     if not glob.glob(result_dir): os.mkdir(result_dir)
