@@ -22,7 +22,7 @@ def remote_delete(ip, user, password, filename):
                 command = "rm -f " + root_dir + "/" + filename
                 return [run(command).succeeded, filename]
             else:
-                return [False, filename, "No serch file!"]
+                return [False, filename, "Not Found File"]
 
 def get_cfg():
     f = open("SimpleDeleteSender.cfg", "r")
