@@ -19,7 +19,7 @@ def remote_delete(ip, user, password, filename):
             command = "ls " + root_dir + "/" + filename
             if run(command).succeeded:
 
-                command = "rm -f " + root_dir + "/" + filename
+                command = "rm -f " + root_dir + "/" + filename + " " + filename + ".ifr"
                 return [run(command).succeeded, filename]
             else:
                 return [False, filename, "\"file not found\""]
