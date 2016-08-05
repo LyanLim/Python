@@ -22,7 +22,7 @@ def remote_delete(ip, user, password, filename):
                 command = "rm -f " + root_dir + "/" + filename
                 return [run(command).succeeded, filename]
             else:
-                return [False, filename, "Not Found File"]
+                return [False, filename, "\"file not found\""]
 
 def get_cfg():
     f = open("SimpleDeleteSender.cfg", "r")
@@ -46,7 +46,7 @@ def main():
         pass
     else:
         if glob.glob(work_dir + "/" + delete_file):
-            print ("Exist Delete_File(%s) in Work Directory!" % delete_file)
+            print ("exist delete_file(%s) in work directory!" % delete_file)
             exit()
 
         if glob.glob(import_dir + "/" + delete_file):
@@ -67,9 +67,9 @@ def main():
                 for ip in ip_list.keys():
                     result = remote_delete(ip, ip_list[ip][0], ip_list[ip][1], filename)
                     if result[0]:
-                        f_resultfile.write(result[1] + ",SUCCESS\n")
+                        f_resultfile.write(result[1] + ",success\n")
                     else:
-                        f_resultfile.write(result[1] + "FAIL," + result[2] + "\n")
+                        f_resultfile.write(result[1] + ",fail," + result[2] + "\n")
 
             f_deletefile.close()
             f_resultfile.close()
