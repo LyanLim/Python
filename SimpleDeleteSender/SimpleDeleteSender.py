@@ -69,7 +69,7 @@ def main():
                     if result[0]:
                         f_resultfile.write(result[1] + ",SUCCESS\n")
                     else:
-                        f_resultfile.write(result[1] + "FAIL," + result[2] "\n")
+                        f_resultfile.write(result[1] + "FAIL," + result[2] + "\n")
 
             f_deletefile.close()
             f_resultfile.close()
