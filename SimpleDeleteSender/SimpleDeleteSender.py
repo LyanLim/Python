@@ -1,13 +1,12 @@
 #!/usr/bin/pathon
 # -*- coding: utf-8 -*-
 
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 import re
+import os
+import glob
 from fabric.api import *
 
-def deploy(ip, password, user, src_full_path, dst_path):
+def remote_delete(ip, password, user, filename):
     with settings(
         hide('warnings', 'running', 'stdout'),
         # parallel = True,
@@ -16,21 +15,7 @@ def deploy(ip, password, user, src_full_path, dst_path):
         password = password,
     ):
 
-        result = put(src_full_path, dst_path).succeeded
-
-    return result
-
-
-def remote_commander(ip, password, user, dst_full_path, script_name, command):
-    with settings(
-        hide('warnings', 'running', 'stdout'),
-        # parallel = True,
-        host_string=ip,
-        user = user,
-        password = password,
-    ):
-
-        with cd(dst_full_path):
+        with cd(dst_path):
             with quiet():
                 result = run(command).succeeded
 
@@ -54,35 +39,39 @@ def get_cfg():
     f.close()
 
 def main():
-    for ip in ip_list.keys():
 
-        if config['Excute_Mode']:
-            if deploy(ip, ip_list[ip][1], ip_list[ip][0], src_full_path, dst_path):
-                print ("deploy,%s,\"%s\" to \"%s\" upload,success" % (ip, src_full_path, dst_path))
-                command = 'bash ' + dst_full_path + '/' + start_sctipt
-                print ("remote_commander,%s,\"%s\" excute,%s" % (ip, command, remote_commander(ip, ip_list[ip], ip_list[ip][0], dst_full_path, start_sctipt, command)))
-            else:
-                print ("%s, File Transfer Fail" % ip)
-        else:
-            pass
+    if mode:
+        pass
+    else:
+        for t_file in glob.glob(import_dir):
+            if t_file == delete_file:
+                #os.rename(import_dir + "/" + delete_file, work_dir + "/" + delete_file)
+                print t_file
+
+        # for ip in ip_list.keys():
+
+
+
 if __name__ == '__main__':
 
     config = {}
     ip_list = {}
 
-    #read config file
     get_cfg()
 
-    src_path = config['Source_Dir_Path']
-    src_dir_name= config['Source_Dir_Name']
-    dst_path = config['Destination_Path']
-    src_full_path = src_path + '/' + src_dir_name
-    dst_full_path = dst_path + '/' + src_dir_name
-    if int(config['Excute_Mode']):
-        if config.get('Start_Sctipt'):
-            start_sctipt = config['Start_Sctipt']
-        else:
-            exit("You must check config file : Start_Sctipt")
 
+    import_dir = config['Import_Dir']
+    work_dir = config['Temp_Dir']
+    result_dir = config['Result_Dir']
+    delete_file = config['Delete_File_Name']
+    root_dir = config['RootDir']
+    mode = config['Mode']
     main()
 
+
+
+Import_Dir=/Users/hellolcs/GitHub/SimpleDeleteSender/Transaction/import
+Delete_File_Name=deletefile.txt
+Temp_Dir=/Users/hellolcs/GitHub/SimpleDeleteSender/Transaction/work
+Result_Dir=/Users/hellolcs/GitHub/SimpleDeleteSender/Transaction/result
+RootDir=/data/pub/hanaro
