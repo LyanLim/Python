@@ -4,9 +4,10 @@
 import re
 import os
 import glob
+import time
 from fabric.api import *
 
-def remote_delete(ip, password, user, filename):
+def remote_delete(ip, user, password, filename):
     with settings(
         hide('warnings', 'running', 'stdout'),
         # parallel = True,
@@ -14,18 +15,17 @@ def remote_delete(ip, password, user, filename):
         user = user,
         password = password,
     ):
-
-        with cd(dst_path):
-            with quiet():
-                result = run(command).succeeded
-
+        with quiet():
+            command = "rm -f " + root_dir + "/" + filename
+            # print command
+            result = run(command).succeeded
     return result
 
 def get_cfg():
-    f = open("Remote_Commander.cfg", "r")
+    f = open("SimpleDeleteSender.cfg", "r")
     lines = f.readlines()
     for line in lines:
-        if re.match('^#', line[0]):sc
+        if re.match('^#', line[0]):
             pass
         else:
             line = line.strip('\n')
@@ -35,22 +35,41 @@ def get_cfg():
                 ip_list[value[0]] = [value[1], value[2]]
             else:
                 config[key[0]] = key[1]
-
     f.close()
 
 def main():
 
-    if mode:
+    if int(mode):
         pass
     else:
-        for t_file in glob.glob(import_dir):
-            if t_file == delete_file:
-                #os.rename(import_dir + "/" + delete_file, work_dir + "/" + delete_file)
-                print t_file
+        if glob.glob(work_dir + "/" + delete_file):
+            print ("Exist Delete_File(%s) in Work Directory!" % delete_file)
+            exit()
 
-        # for ip in ip_list.keys():
+        if glob.glob(import_dir + "/" + delete_file):
 
+            os.rename(import_dir + "/" + delete_file, work_dir + "/" + delete_file)
 
+            n_time = time.strftime("%Y-%m-%d-%H", time.localtime(time.time()))
+
+            result_file = n_time + "_Result.txt"
+            done_file = n_time + "_" + delete_file
+
+            f_deletefile = open(work_dir + "/" + delete_file, "r")
+            f_resultfile = open(result_dir + "/" + result_file, "w")
+
+            lines = f_deletefile.readlines()
+            for filename in lines:
+                filename = filename.strip('\n')
+                for ip in ip_list.keys():
+                    if remote_delete(ip, ip_list[ip][0], ip_list[ip][1], filename):
+                        f_resultfile.write("SUCCESS," + filename + "\n")
+                    else:
+                        f_resultfile.write("FAIL," + filename + "\n")
+            f_deletefile.close()
+            f_resultfile.close()
+
+            os.rename(work_dir + "/" + delete_file, result_dir + "/" + done_file)
 
 if __name__ == '__main__':
 
@@ -59,19 +78,16 @@ if __name__ == '__main__':
 
     get_cfg()
 
-
     import_dir = config['Import_Dir']
     work_dir = config['Temp_Dir']
     result_dir = config['Result_Dir']
     delete_file = config['Delete_File_Name']
     root_dir = config['RootDir']
     mode = config['Mode']
+
+    #create default directory
+    if not glob.glob(import_dir): os.mkdir(import_dir)
+    if not glob.glob(work_dir): os.mkdir(work_dir)
+    if not glob.glob(result_dir): os.mkdir(result_dir)
+
     main()
-
-
-#
-# Import_Dir=/Users/hellolcs/GitHub/SimpleDeleteSender/Transaction/import
-# Delete_File_Name=deletefile.txt
-# Temp_Dir=/Users/hellolcs/GitHub/SimpleDeleteSender/Transaction/work
-# Result_Dir=/Users/hellolcs/GitHub/SimpleDeleteSender/Transaction/result
-# RootDir=/data/pub/hanaro
