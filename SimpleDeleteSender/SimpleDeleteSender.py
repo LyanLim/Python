@@ -25,7 +25,7 @@ def get_cfg():
     f = open("Remote_Commander.cfg", "r")
     lines = f.readlines()
     for line in lines:
-        if re.match('^#', line[0]):
+        if re.match('^#', line[0]):sc
             pass
         else:
             line = line.strip('\n')
@@ -69,9 +69,9 @@ if __name__ == '__main__':
     main()
 
 
-
-Import_Dir=/Users/hellolcs/GitHub/SimpleDeleteSender/Transaction/import
-Delete_File_Name=deletefile.txt
-Temp_Dir=/Users/hellolcs/GitHub/SimpleDeleteSender/Transaction/work
-Result_Dir=/Users/hellolcs/GitHub/SimpleDeleteSender/Transaction/result
-RootDir=/data/pub/hanaro
+#
+# Import_Dir=/Users/hellolcs/GitHub/SimpleDeleteSender/Transaction/import
+# Delete_File_Name=deletefile.txt
+# Temp_Dir=/Users/hellolcs/GitHub/SimpleDeleteSender/Transaction/work
+# Result_Dir=/Users/hellolcs/GitHub/SimpleDeleteSender/Transaction/result
+# RootDir=/data/pub/hanaro
