@@ -6,23 +6,29 @@ import os
 import glob
 import time
 from fabric.api import *
+from fabric.exceptions import *
 
 def remote_delete(ip, user, password, filename):
     with settings(
         hide('warnings', 'running', 'stdout'),
-        # parallel = True,
+        parallel = True,
         host_string=ip,
         user = user,
         password = password,
+        timeout = c_timeout
     ):
-        with quiet():
-            command = "ls " + root_dir + "/" + filename
-            if run(command).succeeded:
-
-                command = "rm -f " + root_dir + "/" + filename + " " + root_dir + "/" + filename + ".ifr"
-                return [run(command).succeeded, filename]
-            else:
-                return [False, filename, "\"file not found\""]
+        try:
+            with quiet():
+                command = "ls " + root_dir + "/" + filename
+                if run(command).succeeded:
+                    print "excute"
+                    command = "rm -f " + root_dir + "/" + filename + " " + root_dir + "/" + filename + ".ifr"
+                    return [run(command).succeeded, filename]
+                else:
+                    return [False, filename, "\"file not found\""]
+        except NetworkError as error_msg:
+            print (error_msg)
+            return [False, filename, str(error_msg)]
 
 def get_cfg():
     f = open("SimpleDeleteSender.cfg", "r")
@@ -53,8 +59,7 @@ def main():
 
             os.rename(import_dir + "/" + delete_file, work_dir + "/" + delete_file)
 
-            n_time = time.strftime("%Y-%m-%d-%H", time.localtime(time.time()))
-
+            n_time = time.strftime("%Y-%m-%d-%H-%M", time.localtime(time.time()))
             result_file = n_time + "_Result.txt"
             done_file = n_time + "_" + delete_file
 
@@ -90,6 +95,7 @@ if __name__ == '__main__':
     delete_file = config['Delete_File_Name']
     root_dir = config['RootDir']
     mode = config['Mode']
+    c_timeout= int(config['Connection_Timeout'])
 
     #create default directory
     if not glob.glob(transaction): os.mkdir(transaction)
